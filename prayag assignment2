@@ -1,0 +1,76 @@
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include <stdio.h>
+
+
+uint8_t G_DataID = 0;
+int32_t G_DataValue = 0;
+
+
+typedef struct {
+    uint8_t dataID;
+    int32_t DataValue;
+} Data_t;
+
+
+QueueHandle_t Queue1;
+
+
+TaskHandle_t TaskHandle_1;
+TaskHandle_t TaskHandle_2;
+
+void ExampleTask1(void *pV) {
+    Data_t data;
+    while (1) {
+        data.dataID = G_DataID;
+        data.DataValue = G_DataValue;
+
+        xQueueSend(Queue1, &data, portMAX_DELAY);
+        vTaskDelay(pdMS_TO_TICKS(500)); 
+    }
+}
+
+void ExampleTask2(void *pV) {
+    Data_t data;
+    while (1) {
+        if (xQueueReceive(Queue1, &data, portMAX_DELAY)) {
+            printf("Received dataID: %d, DataValue: %d\n", data.dataID, data.DataValue);
+
+            if (data.dataID == 0) {
+                vTaskDelete(NULL); 
+            } else if (data.dataID == 1) {
+                if (data.DataValue == 0) {
+                    
+                    uxPriority_t currentPriority = uxTaskPriorityGet(NULL);
+                    vTaskPrioritySet(NULL, currentPriority + 2);
+                } else if (data.DataValue == 1) {
+                    
+                    uxPriority_t currentPriority = uxTaskPriorityGet(NULL);
+                    if (currentPriority > 1) {
+                        vTaskPrioritySet(NULL, currentPriority - 2);
+                    }
+                } else if (data.DataValue == 2) {
+                    vTaskDelete(NULL); 
+                }
+            }
+        }
+    }
+}
+
+int main() {
+    
+    Queue1 = xQueueCreate(5, sizeof(Data_t));
+    
+    
+    xTaskCreate(ExampleTask1, "Task1", 1000, NULL, 1, &TaskHandle_1);
+    xTaskCreate(ExampleTask2, "Task2", 1000, NULL, 1, &TaskHandle_2);
+    
+    
+    vTaskStartScheduler();
+    
+    
+    for (;;);
+    
+    return 0;
+}
