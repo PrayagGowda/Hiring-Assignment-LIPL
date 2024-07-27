@@ -1,0 +1,29 @@
+#include <stdint.h>
+
+// Assuming 8 digital inputs
+#define NUM_DIGITAL_INPUTS 8
+
+// Global variables
+uint8_t g_ReadDIpinSts = 0; 
+uint8_t g_AppDIpinSts = 0;   
+
+
+static uint8_t count[NUM_DIGITAL_INPUTS] = {0};
+static uint8_t lastStatus[NUM_DIGITAL_INPUTS] = {0};
+
+int ISR_DIsampling() {
+    
+        } else {
+           
+        }
+
+        
+        if (count[i] >= 10) {
+          
+        } else {
+            
+        }
+    }
+
+    return 0; 
+}
